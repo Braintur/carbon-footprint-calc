@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
+    <title>CO2 Calculator</title>
+</head>
+<header>CO2 Calc</header>
+<body>
+    <div class="question-wrap">
+        <div class="question-text">{{ question['question'] }}</div>
+        {% for button_text in question['buttons'] %}
+          <div class="question-button" onclick="handleButtonClick('{{ button_text }}')">{{ button_text }}</div>
+        {% endfor %}
+    </div>
+</body>
+<script>
+    let currentQuestionIndex = {{ current_question_index }};
+    
+    function handleButtonClick(selectedText) {
+        fetch('/next_question', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                current_question_index: currentQuestionIndex,
+                selected_text: selectedText
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Next question data:', data);
+            currentQuestionIndex = data.current_question_index;
+            const questionWrap = document.querySelector('.question-wrap');
+            questionWrap.innerHTML = `<div class="question-text">${data.question}</div>`;
+            data.buttons.forEach(buttonText => {
+                const button = document.createElement('div');
+                button.classList.add('question-button');
+                button.setAttribute('onclick', `handleButtonClick('${buttonText}')`);
+                button.textContent = buttonText;
+                questionWrap.appendChild(button);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+</html>
