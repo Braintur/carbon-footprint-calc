@@ -1,10 +1,10 @@
-from flask import Flask, render_template
+from google import genai
 
-app = Flask(__name__)
+API_KEY= "AIzaSyCkdc_A-FjHHbS5_EweBmn2OEjEJ4_GgnU"
+client = genai.Client(api_key=API_KEY)
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-if __name__ == '__main__':
-    app.run(debug=True)
+response = client.models.generate_content(
+    model='gemini-2.0-flash', 
+    contents='Tell me a story in 300 words.'
+)
+print(response.text)
