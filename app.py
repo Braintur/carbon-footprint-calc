@@ -13,8 +13,8 @@ footprint = 0
 questions = [
     {
         "question": "How do you get around?",
-        "buttons": ["Walking/Cycling", "Public Transport", "Gas/Diesel Car", "Hybrid car", "Electric car"],
-        "footprint": [0, 380, 2300, 1000, 650]
+        "buttons": ["Walking/Cycling", "Public Transport", "Electric car", "Hybrid car", "Gas/Diesel Car"],
+        "footprint": [0, 380, 650, 1000, 2300]
     },
     {
         "question": "How often do you fly by plane? (per year)",
@@ -25,6 +25,16 @@ questions = [
         "question": "How old is your house?",
         "buttons": ["1-15 y.o.", "16-30 y.o.", "31-60 y.o.", "60+ y.o."],
         "footprint": [1000, 2000, 3000, 4000]
+    },
+    {
+        "question": "What is your primary energy source?",
+        "buttons": ["Fully renewable", "Mixed sources", "Primarily fossile", "Only fossile"],
+        "footprint": [0, 1662, 2000, 2800]
+    },
+    {
+        "question": "What is your diet?",
+        "buttons": ["Vegan", "Vegetarian", "Mixeterian (occasional meat)", "Regular meat"],
+        "footprint": [1060, 1380, 2600, 2900]
     }
 ]
 
@@ -35,20 +45,24 @@ def index():
 @app.route('/next_question', methods=['POST'])
 def next_question():
     global answered, footprint
+    
     data = request.json
     current_question_index = data.get('current_question_index', 0)
     selected_text = data.get('selected_text')
+    
     print(f"Button pressed: {selected_text}")
     answers.append(selected_text)
-    print(current_question_index)
+    
     if selected_text == "Continue":
         print("Continue")
     else:
         footprint += questions[current_question_index]["footprint"][questions[current_question_index]["buttons"].index(selected_text)]
         
     next_question_index = current_question_index + 1
+    
     if next_question_index < len(questions):
         next_question = questions[next_question_index]
+        
         return jsonify({
             "question": next_question["question"],
             "buttons": next_question["buttons"],
@@ -57,6 +71,7 @@ def next_question():
     else:
         if answered:
             answered=False
+            
             return jsonify({
                 "question": f"Thank you for completing the survey. Based on the answers, your carbon footprint is {footprint/1000} tons of CO2 per year.",
                 "buttons": [],
@@ -67,16 +82,17 @@ def next_question():
             
             for i, question in enumerate(questions):
                 prompt += f"{question['question']}: {answers[i]}\n"
-            prompt += "Based on the answers, how the person can decrease their carbon footprint? (no longer then 40 words, your answer should address the person, be friendly and encouraging)"
+            prompt += "Based on the answers, how the person can decrease their carbon footprint? (no longer than 100 words, your answer should address the person, be friendly and encouraging). Use html formatting for subheadings"
             
             print(prompt)
             
             response = client.models.generate_content(
-            model='gemini-2.0-flash', 
-            contents=prompt
+                model='gemini-2.0-flash', 
+                contents=prompt
             )
             
             answered = True
+            
             return jsonify({
                 "question": str(response.text),
                 "buttons": ["Continue"],
