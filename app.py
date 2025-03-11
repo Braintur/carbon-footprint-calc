@@ -82,7 +82,7 @@ def next_question():
             
             for i, question in enumerate(questions):
                 prompt += f"{question['question']}: {answers[i]}\n"
-            prompt += "Based on the answers, how the person can decrease their carbon footprint? (no longer than 100 words, your answer should address the person, be friendly and encouraging). Use html formatting for subheadings"
+            prompt += "Based on the answers, how the person can decrease their carbon footprint? (no longer than 50 words, your answer should address the person, be friendly and encouraging). Do not use any formatting"
             
             print(prompt)
             
