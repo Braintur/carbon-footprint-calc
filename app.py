@@ -87,7 +87,7 @@ def next_question():
             print(prompt)
             
             response = client.models.generate_content(
-                model='gemini-2.0-flash', 
+                model='gemini-2.0-flash-lite', 
                 contents=prompt
             )
             
@@ -98,7 +98,7 @@ def next_question():
                 "buttons": ["Continue"],
                 "current_question_index": next_question_index
             })
-    
+
 
 if __name__ == '__main__':
     app.run(debug=True)
